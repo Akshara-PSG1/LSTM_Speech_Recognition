@@ -7,3 +7,4 @@ joblib
 pycaw
 comtypes
 screen-brightness-control
+sounddevice
