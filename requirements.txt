@@ -1,8 +1,8 @@
 librosa
-pyautogui
-webbrowser
 streamlit
+webbrowser
 sounddevice
 soundfile
 numpy
 tensorflow
+pyautogui
