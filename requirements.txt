@@ -4,4 +4,7 @@ sounddevice
 soundfile
 numpy
 tensorflow
-pyautogui
+joblib
+pycaw
+comtypes
+screen-brightness-control
