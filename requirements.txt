@@ -1,6 +1,5 @@
 librosa
 streamlit
-webbrowser
 sounddevice
 soundfile
 numpy
