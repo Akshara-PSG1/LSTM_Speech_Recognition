@@ -1,0 +1,8 @@
+librosa
+pyautogui
+webbrowser
+streamlit
+sounddevice
+soundfile
+numpy
+tensorflow
