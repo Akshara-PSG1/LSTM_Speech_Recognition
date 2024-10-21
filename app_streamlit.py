@@ -2,11 +2,17 @@ import os
 import joblib
 import pyautogui
 import webbrowser
+import librosa
 import numpy as np
 import soundfile as sf
 import streamlit as st
 import sounddevice as sd
+from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+import subprocess
 from tensorflow.keras.models import load_model
+import screen_brightness_control as sbc
 
 def record_audio(duration):
     st.write("Recording...")
@@ -52,11 +58,17 @@ def predict_command(audio_data, model, label_encoder):
     else:
         return None
 
-def set_brightness(value):
-    if 0 <= value <= 100:
-        os.system(f"powershell.exe (Get-WmiObject -Namespace root/wmi -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,{value})")
-    else:
-        st.error("Brightness value should be between 0 and 100.")
+def set_brightness(level):
+    sbc.set_brightness(level)
+
+def mute_sound():
+    sessions = AudioUtilities.GetAllSessions()
+    for session in sessions:
+        volume = session._ctl.QueryInterface(ISimpleAudioVolume)
+        volume.SetMasterVolume(0, None)
+
+def start_screen_recording():
+    subprocess.Popen(['ffmpeg', '-video_size', '1920x1080', '-framerate', '25', '-f', 'x11grab', '-i', ':0.0', 'output.mp4'])
 
 def handle_shutdown():
     st.write("Are You Sure You want to Shutdown the system?")
@@ -75,7 +87,17 @@ def handle_restart():
 
     if st.button("No"):
         st.write("OK, not restarting. Ready for the next command.")
-        
+
+def open_application(app_name):
+    if app_name == "chrome":
+        subprocess.Popen(["C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"])
+    if app_name == "notepad":
+        subprocess.Popen('notepad.exe') 
+        st.write("Notepad started.")
+    if app_name == "Calculator":
+        subprocess.Popen('calc.exe') 
+        st.write("Calculator started.")
+
 def execute_command(command):
     if command == "Dim":
         st.write("Dimming brightness...")
@@ -87,27 +109,25 @@ def execute_command(command):
         
     elif command == "Mute":
         st.write("Muting sound...")
-        pyautogui.press('volume_mute')
+        mute_sound()
         
     elif command == "Record":
         st.write("Starting screen recording...")
-        pyautogui.hotkey('win', 'g')
+        start_screen_recording()
         
     elif command == "Search":
         st.write("Opening Google Chrome and searching...")
         search_query = st.text_input("What do you want to search for?")
-        pyautogui.hotkey('ctrl', 't')  
-        pyautogui.write(search_query) 
-        pyautogui.press('enter') 
+        webbrowser.open(f'https://www.google.com/search?q={search_query}')
         
     elif command == "Shutdown":
         handle_shutdown()
         
     elif command == "Start":
-        st.write("Starting application...")
-        pyautogui.hotkey('win', 'r') 
-        pyautogui.write("chrome") 
-        pyautogui.press('enter')
+       app_choice = st.selectbox("Which application would you like to start?", 
+                                  ("Chrome", "Calculator", "Notepad"))
+        if st.button("Start Application"):
+            open_application(app_choice)
         
     elif command == "Restart":
         handle_restart()
