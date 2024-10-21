@@ -126,9 +126,9 @@ def execute_command(command):
     elif command == "Start":
        app_choice = st.selectbox("Which application would you like to start?", 
                                   ("Chrome", "Calculator", "Notepad"))
-        if st.button("Start Application"):
-            open_application(app_choice)
-        
+       if st.button("Start Application"):
+           open_application(app_choice)
+    
     elif command == "Restart":
         handle_restart()
         
