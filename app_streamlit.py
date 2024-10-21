@@ -1,6 +1,5 @@
 import os
 import joblib
-import pyautogui
 import webbrowser
 import librosa
 import numpy as np
