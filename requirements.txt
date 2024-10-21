@@ -1,7 +1,5 @@
 librosa
 streamlit
-pydub
-simpleaudio
 soundfile
 numpy
 tensorflow
