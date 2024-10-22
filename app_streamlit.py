@@ -7,7 +7,6 @@ import soundfile as sf
 import streamlit as st
 import ctypes
 from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
 import subprocess
 from tensorflow.keras.models import load_model
 import screen_brightness_control as sbc
