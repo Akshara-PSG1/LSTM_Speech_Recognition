@@ -5,6 +5,7 @@ import librosa
 import numpy as np
 import soundfile as sf
 import streamlit as st
+import ctypes
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
