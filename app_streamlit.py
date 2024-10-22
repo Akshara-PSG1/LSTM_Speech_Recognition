@@ -12,8 +12,8 @@ from tensorflow.keras.models import load_model
 import screen_brightness_control as sbc
 import wave
 import io
-import pyaudio
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
+import pyaudio
 
 def record_audio_pyaudio(duration):
     chunk = 1024  # Record in chunks of 1024 samples
