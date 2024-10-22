@@ -10,16 +10,45 @@ from ctypes import cast, POINTER
 import subprocess
 from tensorflow.keras.models import load_model
 import screen_brightness_control as sbc
-import sounddevice as sd
+import pyaudio
+import wave
+import io
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
-def record_audio(duration):
-    st.write("Recording...")
-    audio_data = sd.rec(int(duration * 44100), samplerate=44100, channels=1, dtype='float64')
-    sd.wait()
-    st.write("Recording finished.")
-    return audio_data
+def record_audio_pyaudio(duration):
+    chunk = 1024  # Record in chunks of 1024 samples
+    sample_format = pyaudio.paInt16  # 16 bits per sample
+    channels = 1  # Mono
+    fs = 44100  # Record at 44100 samples per second
+    p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
+    # Start recording
+    st.write("Recording...")
+    stream = p.open(format=sample_format, channels=channels, rate=fs, frames_per_buffer=chunk, input=True)
+    frames = []  # Initialize array to store frames
+
+    for i in range(0, int(fs / chunk * duration)):
+        data = stream.read(chunk)
+        frames.append(data)
+
+    # Stop and close the stream
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    # Save the recorded data into a byte stream
+    audio_stream = io.BytesIO()
+    wf = wave.open(audio_stream, 'wb')
+    wf.setnchannels(channels)
+    wf.setsampwidth(p.get_sample_size(sample_format))
+    wf.setframerate(fs)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+    audio_stream.seek(0)  # Reset stream position to the start
+
+    st.write("Recording finished.")
+    return audio_stream
 @st.cache(allow_output_mutation=True)
 def load_model(model_path):
     model = load_model(model_path)
@@ -146,15 +175,15 @@ model = load_model(model_path)
 
 
 if st.button("Record Audio"):
-    audio_data = record_audio(duration=5)
+    audio_stream = record_audio_pyaudio(duration=3)
+    audio_data, _ = librosa.load(audio_stream, sr=44100)  # Load audio using librosa for processing
 
 if audio_data is not None:
-    audio_data = audio_data.flatten() 
-    audio_data = audio_data.astype(np.float32) 
+    audio_data = audio_data.flatten()
+    audio_data = audio_data.astype(np.float32)
 
-    
     command = predict_command(audio_data, model, label_encoder)
-    
+
     if command:
         st.write(f"Predicted Command: {command}")
         execute_command(command)
