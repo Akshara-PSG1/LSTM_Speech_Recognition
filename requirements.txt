@@ -1,6 +1,5 @@
 librosa
 streamlit
-soundfile
 numpy
 tensorflow
 joblib
@@ -8,3 +7,4 @@ pycaw
 comtypes
 screen-brightness-control
 sounddevice
+soundfile
