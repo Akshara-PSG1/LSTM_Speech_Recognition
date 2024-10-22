@@ -6,13 +6,13 @@ import numpy as np
 import soundfile as sf
 import streamlit as st
 import ctypes
-from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 import subprocess
 from tensorflow.keras.models import load_model
 import screen_brightness_control as sbc
 import sounddevice as sd
+from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
 def record_audio(duration):
     st.write("Recording...")
