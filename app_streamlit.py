@@ -10,9 +10,9 @@ from ctypes import cast, POINTER
 import subprocess
 from tensorflow.keras.models import load_model
 import screen_brightness_control as sbc
-import pyaudio
 import wave
 import io
+import pyaudio
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
 def record_audio_pyaudio(duration):
