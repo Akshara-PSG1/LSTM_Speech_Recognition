@@ -1,10 +1,11 @@
-librosa
-streamlit
-numpy
-tensorflow
+flask
 joblib
-pycaw
-comtypes
-screen-brightness-control
-sounddevice
-soundfile
+numpy 
+soundfile 
+librosa
+os
+pydub
+tensorflow
+screen_brightness_control as sbc
+pyautogui
+subprocess
