@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Command Recognition System</title>
+</head>
+<body>
+    <h1>Speech Command Recognition System</h1>
+    <button id="recordButton">Record and Predict</button>
+    <p id="result"></p>
+    <p id="responseMessage"></p> <!-- New paragraph to display the response message -->
+    <input type="text" id="confirmationInput" style="display: none;" placeholder="Type 'y' to stop">
+    <button id="confirmButton" style="display: none;">Confirm</button>
+
+    <script>
+        const recordButton = document.getElementById('recordButton');
+        const resultText = document.getElementById('result');
+        const responseMessageText = document.getElementById('responseMessage');
+        const confirmationInput = document.getElementById('confirmationInput');
+        const confirmButton = document.getElementById('confirmButton');
+        let mediaRecorder;
+        let audioChunks = [];
+
+        recordButton.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        audioChunks = [];
+                        const formData = new FormData();
+                        formData.append('file', audioBlob);
+
+                        const response = await fetch('/predict', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await response.json();
+
+                        if (data.command === "uncertain") {
+                            resultText.innerText = `Command: ${data.command}`;
+                            responseMessageText.innerText = data.message;
+                        } else {
+                            resultText.innerText = `Command: ${data.command}`;
+                            responseMessageText.innerText = data.message;
+
+                            if (data.command.toLowerCase() === 'stop') {
+                                confirmationInput.style.display = 'inline-block';
+                                confirmButton.style.display = 'inline-block';
+                            } else {
+                                confirmationInput.style.display = 'none';
+                                confirmButton.style.display = 'none';
+                            }
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    recordButton.textContent = 'Stop Recording';
+                } catch (err) {
+                    console.error('Error accessing microphone:', err);
+                }
+            } else if (mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                recordButton.textContent = 'Record and Predict';
+            }
+        });
+
+        confirmButton.addEventListener('click', async () => {
+            const confirmation = confirmationInput.value.trim().toLowerCase();
+
+            if (confirmation === 'y') {
+                const response = await fetch('/confirm_stop', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ confirmation: 'y' })
+                });
+                const data = await response.json();
+                responseMessageText.innerText = data.message;
+            } else {
+                responseMessageText.innerText = "Stop cancelled.";
+            }
+
+            confirmationInput.style.display = 'none';
+            confirmButton.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
